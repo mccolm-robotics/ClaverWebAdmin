@@ -1,0 +1,539 @@
+* {
+	padding: 0;
+	margin: 0;
+	text-decoration: none;
+	list-style: none;
+	box-sizing: border-box;
+}
+
+body{
+	font-family: montserrat;
+	background-color: #0b457c;
+	color: rgb(17, 179, 17);
+	/* display: grid; */
+}
+
+nav{
+	background: #07335c;
+	height: 80px;
+	width: 100%;
+}
+
+label.logo{
+	color: white;
+	font-size: 35px;
+	line-height: 80px;
+	padding: 0 50px;
+	font-weight: bold;
+}
+
+nav ul{
+	float: right;
+	margin-right: 20px;
+	margin-top: 20px;
+}
+
+nav ul li{
+	display: inline-block;
+	line-height: 40px;
+	margin: 0 5px;
+}
+
+nav ul li a{
+	color: white;
+	font-size: 17px;
+	padding: 7px 13px;
+	border-radius: 3px;
+	text-transform: uppercase;
+}
+
+label.nav-icon-label{
+	padding-left: 5px;
+}
+
+a.active,a:hover{
+	background: #1b9bff;
+	transition: .5s;
+}
+
+.checkbtn{
+	font-size: 30px;
+	color: white;
+	float: right;
+	margin-top: 24px;
+	margin-right: 40px;
+	cursor: pointer;
+	display: none;
+}
+
+#check{
+	display: none;
+	background-color: #89ccff;
+}
+
+.nav-label{
+	float: right;
+	color: white;
+	font-size: 17px;
+	text-transform: uppercase;
+	margin-top: 30px;
+	margin-right: 10px;
+	display: none;
+}
+
+.back-arrow{
+	color: white;
+	/* margin-right: 15px; */
+}
+
+.logo-label{
+	margin-left: 15px;
+}
+
+.root-page{
+	font-weight: bold;
+	font-size: 13pt;
+}
+
+.back-arrow:hover{
+	background: orange;
+	border-radius: 50%;
+	transition: 0s;
+}
+
+section{
+	background-size: cover;
+	margin-bottom: 25px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0px;
+
+}
+
+.content > .error{
+	padding: 3px 15px;
+	color: black;
+	background-color: yellow;
+	border-radius: 3px;
+	font-weight: bold;
+}
+
+.content > .message{
+	padding: 3px 15px;
+	color: black;
+	background-color: rgb(116, 204, 116);
+	border-radius: 3px;
+	font-weight: bold;
+}
+
+.content .actions {
+	margin: 0px;
+	margin-bottom: 30px;
+	color: black;
+	background-color: transparent;
+	padding: 0px;
+
+}
+
+.tooltip {
+	position: relative;
+	display: inline-block;
+	border-bottom: 1px dotted black;
+}
+  
+.tooltip .tooltiptext {
+	visibility: hidden;
+	background-color: black;
+	color: #fff;
+	text-align: left;
+	border-radius: 6px;
+	padding: 5px 10px;
+	position: absolute;
+	z-index: 1;
+	top: -5px;
+	right: 140%;
+	font-size:11pt;
+	width: 300px !important;
+}
+
+.tooltip .tooltiptext::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 100%;
+	margin-top: -8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent transparent black;
+}
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
+.content {
+	padding-top: 10px;
+}
+
+.content h2 {
+	margin: 0;
+	padding: 5px 0px 0px 0px;
+	font-size: 25px;
+	color: #c9d6fc;
+}
+.content > p, .content > div {
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+	margin: 15px 0;
+	padding: 15px;
+	background-color: #fff;
+	border-radius: 5px;
+}
+
+.content a{
+	color: white;
+	padding: 4px;
+	border-radius: 4px;
+}
+
+.content > div form button {
+	padding: 2px 0px;
+}
+
+.text-field {
+	margin: 3px;
+	font-size: 12pt;
+}
+
+.content > p table td, .content > div table td {
+	padding: 1px 8px;
+	margin: 0px;
+	vertical-align: top;
+	color: black;
+	white-space: nowrap;
+}
+
+#error {
+	background-color: rgb(226, 222, 0);
+	font-weight: bold;
+	text-align: center;
+	padding: 2px;
+}
+
+.content > p table td input, .content > div table td input{
+	margin: 3px;
+}
+
+.content > p table td:first-child, .content > div table td:first-child {
+	font-weight: bold;
+	color: #4a536e;
+	padding-right: 0px;
+}
+.content > div table th {
+	padding: 0px 10px;
+	color: black;
+}
+.content > div p {
+	padding: 5px;
+	margin: 0 0 10px 0;
+}
+
+.content a > label{
+	padding-left: 4px;
+	margin-right: 8px;
+}
+
+.content > div input{
+	margin-right: 3px;
+}
+
+.config-item{
+	padding: 0px;
+	margin: 0px;
+	color: black;
+}
+
+.config-item a:hover{
+	color: rgb(110, 240, 110);
+	transition: all .2s;
+}
+
+.config-item > form table thead{
+	background-color: orange;
+	min-width: 75px;
+}
+
+
+.config-item td a{
+	color: black;
+	margin: 0px;
+}
+
+.config-form > table td{
+	vertical-align: top;
+}
+
+.bullet {
+    display: list-item;          /* This has to be "list-item"                                               */
+    list-style-type: disc;       /* See https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type     */
+	list-style-position: inside; /* See https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-position */
+	font-weight: normal;
+	padding: 3px 0px;
+}
+
+#options-box {
+	background-color: lightgrey;
+	border: 2px solid orange;
+	margin-top: 2px;
+	padding: 2px;
+}
+
+.form-button {
+	margin: 2px;
+}
+
+.page-menu {
+	float:left;
+	width:20%;
+	padding: 0 10px 5px 10px;
+	
+}
+.page-menu > a {
+	background-color:#e5e5e5;
+	padding:2px 5px;
+	margin-top:7px;
+	display:block;
+	width:100%;
+	color:black;
+	
+}
+
+.main {
+	float:left;
+	width:80%;
+	padding:0 10px;
+}
+
+name {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 1000px;
+	display: inline-block;
+	color: white;
+	margin: 0;
+	font-size: 25px;
+}
+
+/* Style the header */
+.settings-header {
+	background-color: orange;
+	padding: 2px;
+	text-align: center;
+	font-size: 15px;
+	color: black;
+}
+  
+/* Container for flexboxes */
+.settings-container {
+	display: -webkit-flex;
+	display: flex;
+}
+
+/* Create two equal columns that sit next to each other */
+.settings {
+	padding: 10px;
+}
+
+/* Left column */
+.settings.left {
+	-webkit-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	text-align: center;
+}
+
+/* Right column */
+.settings.right {
+	-webkit-flex: 2;
+	-ms-flex: 2;
+	flex: 2;
+	padding:0px;
+	color: black;
+}
+
+/* Footer */
+.settings-footer {
+	background-color: orange;
+	padding: 5px;
+}
+
+/* Container for nested flexboxes */
+.settings-nested-container {
+	display: -webkit-flex;
+	display: flex;
+}
+
+/* Create two equal columns that sit next to each other */
+.settings-nested {
+	padding: 10px;
+}
+
+/* Nested Left column */
+.settings-nested.left {
+	-webkit-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+}
+
+/* Nested Right column */
+.settings-nested.right {
+	-webkit-flex: 2;
+	-ms-flex: 2;
+	flex: 2;
+	display: inline-block;
+}
+
+/* Nested Notes*/
+.settings-nested-footer {
+	background-color: #f1f1f1;
+	padding: 10px;
+	margin-bottom: 8px;
+}
+
+.table-list-label {
+	font-weight: bold;
+	vertical-align: top;
+}
+
+.online {
+	color: green;
+}
+
+.offline {
+	color: red;
+}
+
+.table-owner-flag {
+	background-color: orange;
+	vertical-align: middle !important;
+	border-radius: 5px;
+}
+
+.radio-button-label {
+	margin-right:10px;
+	color: black;
+}
+
+@media only screen and (min-width: 992px) {
+	/*Small Desktop monitor*/
+	.container{
+		width: 80%;
+		margin: auto;
+	}
+	label.logo{
+		padding-left:25px;
+		font-size: 25px;
+	}
+	name {
+		width: 460px;
+	}
+} 
+
+@media only screen and (min-width: 1400px) {
+	/*1080p Desktop monitor*/
+	.container{
+		width: 60%;
+	}
+	label.logo{
+		font-size: 35px;
+		padding-left: 50px;
+	}
+	name {
+		width: 770px;
+	}
+} 
+
+@media screen and (min-width: 700px) and (max-width: 952px){
+	/* Mobile phone in landscape */
+	label.logo{
+		font-size: 30px;
+		padding-left: 50px;
+	}
+	nav ul li a{
+		font-size: 16px;
+	}
+	nav ul li{
+		line-height: 50px;
+	}
+	.settings-nested-container {
+		-webkit-flex-direction: column;
+		flex-direction: column;
+	}
+	.form-button {
+		width: 100%;
+	}
+}
+
+@media (max-width: 1085px){
+	/* Overflow point where the nav labels impact the logo */
+	.checkbtn{
+		display: block;
+	}
+	.nav-label{
+		display: block;
+	}
+	ul{
+		position: fixed;
+		width: 100%;
+		height: 100vh;
+		background: #2c3e50;
+		top: 60px;
+		left: -100%;
+		text-align: center;
+		transition: all .5s;
+	}
+	nav ul li{
+		display: block;
+	}
+	nav ul li a{
+		font-size: 20px;
+	}
+	.content > a:hover,a.active{
+		color: white;
+	}
+	#check:checked ~ ul{
+		left: 0;
+	}
+}
+
+@media screen and (max-width:693px) {
+	/* For mobile phones: in portrait*/
+	.page-menu, .main {
+		width:100%;
+	}
+	.nav-label{
+		display: none;
+	}
+	label.logo{
+		padding-left: 20px;
+		font-size: 27px;
+	}
+	nav ul li{
+		line-height: 80px;
+	}
+	name {
+		width: 330px;
+	}
+	.content > div table th {
+		padding: 0px 0px;
+	}
+	.settings-container, .settings-nested-container {
+		-webkit-flex-direction: column;
+		flex-direction: column;
+	}
+	.text-field {
+		font-size: 16pt;
+	}
+	.form-button {
+		width: 100%;
+	}
+}
