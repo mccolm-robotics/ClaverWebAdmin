@@ -6,6 +6,7 @@ if($_SESSION['user_level'] < 3){
 
 require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/user_mgmt.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/utility/gui_builder.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/utility/helpers.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/gui/gui_text.php');
 
 $admin = new User_Management($connection);
@@ -266,6 +267,11 @@ $client_tally = $admin->get_client_tally();
 			
 			<!-- Section: Connected Message Boards -->
 			<?php echo $gui->section_heading("fas fa-plug", $dash_title_connected, $dash_connected_tooltip); ?>
+
+			<?php 
+				$uuid = bin2hex(random_bytes(16)); 
+				$ip_addr = getIPAddress();
+			?>
 			
 			<div class="config-item">
 				<div class="buttons">
