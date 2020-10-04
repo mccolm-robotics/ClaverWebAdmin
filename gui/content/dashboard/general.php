@@ -267,12 +267,7 @@ $client_tally = $admin->get_client_tally();
 			
 			<!-- Section: Connected Message Boards -->
 			<?php echo $gui->section_heading("fas fa-plug", $dash_title_connected, $dash_connected_tooltip); ?>
-
-			<?php 
-				$uuid = bin2hex(random_bytes(16)); 
-				$ip_addr = getIPAddress();
-			?>
-			
+	
 			<div class="config-item">
 				<div class="buttons">
 					<div class="minus button">-</div>
@@ -294,7 +289,7 @@ $client_tally = $admin->get_client_tally();
 					}
 
 					minus.onclick = function(event){
-						minus_val();
+						value.textContent = "test";
 					}
 
 					plus.onclick = function (event) {
@@ -302,7 +297,7 @@ $client_tally = $admin->get_client_tally();
 					}
 
 					websocket.onopen = function (e){
-						websocket.send(JSON.stringify({agent: 'browser', bid: 'cb6070bf-e9aa-11ea-97ab-7085c2d6de41', token: '958058', mode: 'WhiteBoard'}));
+						websocket.send(JSON.stringify({agent: 'browser', bid: '<?php echo $admin->create_websocket_session(); ?>', mode: 'WhiteBoard'}));
 					}
 
 					websocket.onmessage = function (event) {
@@ -313,6 +308,9 @@ $client_tally = $admin->get_client_tally();
 								break;
 							case 'users':
 								users.textContent = (data.count.toString() + " user" + (data.count == 1 ? "" : "s"));
+								break;
+							case 'test':
+								value.textContent = data.test;
 								break;
 							//default:
 								//console.error("unsupported event", data);

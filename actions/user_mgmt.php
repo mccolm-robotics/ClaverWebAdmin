@@ -4,6 +4,7 @@
     require_once 'db/accounts.php';
     require_once 'db/node_members.php';
     require_once 'db/birthdays.php';
+    require_once 'db/sessions.php';
 
     // Global variables for passing result messages
     $success_message = NULL;
@@ -19,6 +20,7 @@ class User_Management{
     public $nodes;
     public $accounts;
     public $node_members;
+    public $sessions;
     private $page_data = array(); // A list of arrays with data created for this page
 
     private $all_accounts;
@@ -33,6 +35,7 @@ class User_Management{
         $this->accounts = new Accounts($connection);
         $this->node_members = new Node_Members($connection);
         $this->birthdays = new Birthdays($connection);
+        $this->sessions = new Sessions($connection);
     }
 
     // Values needed for constructing the Dashboard view
@@ -62,6 +65,16 @@ class User_Management{
 
     public function get_client_tally(){
         return $this->client_tally;
+    }
+
+    public function create_websocket_session(){
+        $uuid = bin2hex(random_bytes(16)); 
+        $ip_addr = getIPAddress();
+        if($this->sessions->create_websocket_session($uuid, $ip_addr)){
+            return $uuid;
+        }
+        return "Error";
+        
     }
 
     // INSERT: Creates a new user account
