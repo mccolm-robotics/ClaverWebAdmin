@@ -70,7 +70,7 @@ class User_Management{
     public function create_websocket_session(){
         $uuid = bin2hex(random_bytes(16)); 
         $ip_addr = getIPAddress();
-        if($this->sessions->create_websocket_session($uuid, $ip_addr)){
+        if($this->sessions->create_websocket_session($uuid, $_SESSION['id'], $ip_addr, "browser")){
             return $uuid;
         }
         return "Error";

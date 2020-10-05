@@ -21,10 +21,10 @@ class Sessions{
     //-- $uuid: pseudo-random hex string to use as unique identifier (like UUIDv4) (STR)
     //-- $ip_addr: ip address of the client requesting the session (STR)
     // RETURN: boolean
-    public function create_websocket_session($uuid, $ip_addr){
-        if ($stmt = $this->connection->prepare('INSERT INTO sessions(uuid, ip_addr) VALUES (?, ?)')) {
+    public function create_websocket_session($uuid, $user_id, $ip_addr, $session_type){
+        if ($stmt = $this->connection->prepare('INSERT INTO sessions(uuid, user_id, ip_addr, session_type) VALUES (?, ?, ?, ?)')) {
             // Bind parameters (s = string, i = int, b = blob, d = double), in our case the username is a string so we use "s"
-            $stmt->bind_param('ss', $uuid, $ip_addr);
+            $stmt->bind_param('siss', $uuid, $user_id, $ip_addr, $session_type);
             $status = $stmt->execute();
             $stmt->close();
             if($status === false){
