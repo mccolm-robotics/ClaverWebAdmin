@@ -153,37 +153,6 @@ $client_tally = $admin->get_client_tally();
 		<link rel="stylesheet" type="text/css" href="/assets/css/dashboard.css">
 		<link rel="stylesheet" href="/assets/fonts/font-awesome-5.14.0/css/all.css">
 		<script src="/assets/js/management.js"></script>
-		<style type="text/css">
-            .buttons {
-                font-size: 4em;
-                display: flex;
-                justify-content: center;
-            }
-            .button, .value {
-                line-height: 1;
-                padding: 2rem;
-                margin: 2rem;
-                border: medium solid;
-                min-height: 1em;
-                min-width: 1em;
-            }
-            .button {
-                cursor: pointer;
-                user-select: none;
-            }
-            .minus {
-                color: red;
-            }
-            .plus {
-                color: green;
-            }
-            .value {
-                min-width: 2em;
-            }
-            .state {
-                font-size: 2em;
-            }
-        </style>
 	</head>
 
 	<body>
@@ -267,61 +236,139 @@ $client_tally = $admin->get_client_tally();
 			
 			<!-- Section: Connected Message Boards -->
 			<?php echo $gui->section_heading("fas fa-plug", $dash_title_connected, $dash_connected_tooltip); ?>
-	
+						
 			<div class="config-item">
-				<div class="buttons">
-					<div class="minus button">-</div>
-					<div class="value">?</div>
-					<div class="plus button">+</div>
+			<span class="boards">?</span> Boards Online | <span class="users">?</span> online | Refresh time: <span class="refresh">?</span> sec
+				<form action="dashboard.php" method="post" id="manage_node_devices">
+				<div id="node_devices" style="display:none;">
+				<table id="devices_table">
+					<thead>
+						<tr>
+							<th>Node ID</th>
+							<th>Uptime</th>
+							<th>Board Ver.</th>
+							<th>Launcher Ver.</th>
+							<th>Branch</th>
+							<th>Ping</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
 				</div>
-				<div class="state">
-					<span class="users">?</span> online
-				</div>
+				<input type="hidden" id="removeNode" name="removeNode" value="<?= session_id(); ?>">
+				</form>
+				
 				<script>
-					var minus = document.querySelector('.minus'),
-						plus = document.querySelector('.plus'),
-						value = document.querySelector('.value'),
-						users = document.querySelector('.users'),
+					var users = document.querySelector('.users'),
+						boards = document.querySelector('.boards'),
+						refresh = 15,
+						device_list = [],
 						websocket = new WebSocket("ws://127.0.0.1:6789");
 
-					function minus_val(){
+					function some_func(){
 						websocket.send(JSON.stringify({mode: 'WhiteBoard', action: 'minus'}));
 					}
 
-					minus.onclick = function(event){
-						value.textContent = "test";
+					function addRow(tableID, device_uuid, state_values) {
+						var table = document.getElementById(tableID);
+
+						var rowCount = table.rows.length;
+						var row = table.insertRow(rowCount);
+						row.id = device_uuid
+
+						var cell1 = row.insertCell(0);
+						var element1 = document.createElement("input");
+						element1.type = "checkbox";
+						element1.name="chkbox[]";
+						cell1.appendChild(element1);
+						var textnode = document.createTextNode(" " + state_values['name']);
+						cell1.appendChild(textnode);
+						cell1.style.backgroundColor="#ffffff";
+
+						var cell2 = row.insertCell(1);
+						cell2.innerHTML = state_values['uptime'];
+						cell2.style.backgroundColor="#ffffff";
+
+						var cell3 = row.insertCell(2);
+						cell3.innerHTML = state_values['board_ver'];
+						cell3.style.backgroundColor="#ffffff";
+
+						var cell4 = row.insertCell(3);
+						cell4.innerHTML = state_values['launcher_ver'];
+						cell4.style.backgroundColor="#ffffff";
+
+						var cell5 = row.insertCell(4);
+						cell5.innerHTML = state_values['branch'];
+						cell5.style.backgroundColor="#ffffff";
+
+						var cell6 = row.insertCell(5);
+						cell6.innerHTML = state_values['ping'];
+						cell6.style.backgroundColor="#ffffff";
 					}
 
-					plus.onclick = function (event) {
-						websocket.send(JSON.stringify({mode: 'WhiteBoard', action: 'plus'}));
-					}
+					function deleteRow(tableID, rowID) {
+						try {
+							var table = document.getElementById(tableID);
+							var row = document.getElementById(rowID).rowIndex;
+							table.deleteRow(row);
+						}catch(e) {
+							alert(e);
+						}
+					} 
 
 					websocket.onopen = function (e){
-						websocket.send(JSON.stringify({agent: 'browser', bid: '<?php echo $admin->create_websocket_session(); ?>', mode: 'WhiteBoard'}));
+						websocket.send(JSON.stringify(
+							{
+								agent: 'Dashboard', 
+								bid: '<?php echo $admin->create_websocket_session(); ?>', 
+								mode: 'Admin_Dashboard',
+								state: {'refresh': refresh}
+							}));
 					}
 
 					websocket.onmessage = function (event) {
 						data = JSON.parse(event.data);
+						console.log(data);
 						switch (data.type) {
 							case 'state':
-								value.textContent = data.value;
+								boards.textContent = Object.keys(data.value).length;
+								if (device_list.length > 0){
+									for(const dev_uuid of device_list){
+										if(!(dev_uuid in data.value)){
+											deleteRow('devices_table', dev_uuid);
+											array_location = device_list.indexOf(dev_uuid);
+											device_list.splice(array_location, 1);
+											if(device_list.length == 0){
+												document.getElementById("node_devices").style.display = "none";
+											}
+										}
+									}
+								}
+								if (typeof data.value === 'object' && data.value !== null){
+									if(Object.keys(data.value).length > 0){
+										document.getElementById("node_devices").style.display = "block";
+										for (const device_uuid in data.value){
+											// console.log("Start");
+											// console.log(device_uuid);	// UUID
+											// console.log(data.value[device_uuid])
+											device_list.push(device_uuid)
+											addRow('devices_table', device_uuid, data.value[device_uuid]);
+										}
+									}
+								}
 								break;
 							case 'users':
 								users.textContent = (data.count.toString() + " user" + (data.count == 1 ? "" : "s"));
 								break;
-							case 'test':
-								value.textContent = data.test;
-								break;
-							//default:
-								//console.error("unsupported event", data);
 						}
 					};
 				</script>
 			</div>
 			<div class="actions">
-			<a onclick='minus_val()'><i class="fas fa-upload" aria-hidden="true"></i><label>Upgrade</label></a>
-			<a href="#"><i class="fa fa-sync" aria-hidden="true"></i><label>Reboot</label></a>
-			<a href="#"><i class="fas fa-minus-circle" aria-hidden="true"></i><label>Remove</label></a>
+			<a onclick='some_func()'><i class="fas fa-upload" aria-hidden="true"></i><label>Update</label></a>
+			<a href="#"><i class="fas fa-minus-circle" aria-hidden="true"></i><label>Deauthorize</label></a>
+			<a href="#"><i class="fa fa-sync" aria-hidden="true"></i><label>Refresh</label></a>
 			</div>
 			
 			<!-- Section: Accounts -->
