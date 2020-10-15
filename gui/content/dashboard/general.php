@@ -238,7 +238,14 @@ $client_tally = $admin->get_client_tally();
 			<?php echo $gui->section_heading("fas fa-plug", $dash_title_connected, $dash_connected_tooltip); ?>
 						
 			<div class="config-item">
-			<span class="boards">?</span> Boards Online | <span class="users">?</span> online | Refresh time: <span class="refresh">?</span> sec
+				<span class="boards">?</span> Boards Online | <span class="users">?</span> online | Refresh time: 
+				<select name="refresh_times" id="refresh_times" style="padding:0px;">
+					<option value="5">5 sec</option>
+					<option value="10">10 sec</option>
+					<option value="15">15 sec</option>
+					<option value="30">30 sec</option>
+				</select>
+			
 				<form action="dashboard.php" method="post" id="manage_node_devices">
 				<div id="node_devices" style="display:none;">
 				<table id="devices_table">
@@ -262,9 +269,15 @@ $client_tally = $admin->get_client_tally();
 				<script>
 					var users = document.querySelector('.users'),
 						boards = document.querySelector('.boards'),
-						refresh = 15,
+						refresh_interval = 15,
 						device_list = [],
 						websocket = new WebSocket("ws://127.0.0.1:6789");
+
+					var selected_time = document.getElementById('refresh_times');
+					selected_time.value = refresh_interval;
+					selected_time.onchange = function(){
+						websocket.send(JSON.stringify({channel_type: 'direct', action: {update: {setting: {refresh_interval: this.options[this.selectedIndex].value}}}}));
+					}
 
 					function some_func(){
 						websocket.send(JSON.stringify({mode: 'WhiteBoard', action: 'minus'}));
@@ -275,7 +288,7 @@ $client_tally = $admin->get_client_tally();
 
 						var rowCount = table.rows.length;
 						var row = table.insertRow(rowCount);
-						row.id = device_uuid
+						row.id = device_uuid;
 
 						var cell1 = row.insertCell(0);
 						var element1 = document.createElement("input");
@@ -315,7 +328,16 @@ $client_tally = $admin->get_client_tally();
 						}catch(e) {
 							alert(e);
 						}
-					} 
+					}
+
+					function updateRow(tableID, rowIndex, state_values){
+						var table = document.getElementById(tableID);
+						table.rows[rowIndex].cells[1].innerHTML = state_values['uptime'];
+						table.rows[rowIndex].cells[2].innerHTML = state_values['board_ver'];
+						table.rows[rowIndex].cells[3].innerHTML = state_values['launcher_ver'];
+						table.rows[rowIndex].cells[4].innerHTML = state_values['branch'];
+						table.rows[rowIndex].cells[5].innerHTML = state_values['ping'];
+					}
 
 					websocket.onopen = function (e){
 						websocket.send(JSON.stringify(
@@ -323,16 +345,16 @@ $client_tally = $admin->get_client_tally();
 								agent: 'Dashboard', 
 								bid: '<?php echo $admin->create_websocket_session(); ?>', 
 								mode: 'Admin_Dashboard',
-								state: {'refresh': refresh}
+								state: {'refresh': refresh_interval}
 							}));
 					}
 
 					websocket.onmessage = function (event) {
 						data = JSON.parse(event.data);
-						console.log(data);
 						switch (data.type) {
 							case 'state':
 								boards.textContent = Object.keys(data.value).length;
+								// Remove any devices from the table that are no longer active
 								if (device_list.length > 0){
 									for(const dev_uuid of device_list){
 										if(!(dev_uuid in data.value)){
@@ -349,11 +371,17 @@ $client_tally = $admin->get_client_tally();
 									if(Object.keys(data.value).length > 0){
 										document.getElementById("node_devices").style.display = "block";
 										for (const device_uuid in data.value){
-											// console.log("Start");
-											// console.log(device_uuid);	// UUID
-											// console.log(data.value[device_uuid])
-											device_list.push(device_uuid)
-											addRow('devices_table', device_uuid, data.value[device_uuid]);
+											if (device_list.includes(device_uuid)){
+												var rowIndex = document.getElementById(device_uuid).rowIndex;
+												updateRow('devices_table', rowIndex, data.value[device_uuid]);
+											}
+											else{
+												// console.log("Start");
+												// console.log(device_uuid);	// UUID
+												// console.log(data.value[device_uuid]);
+												device_list.push(device_uuid);
+												addRow('devices_table', device_uuid, data.value[device_uuid]);
+											}
 										}
 									}
 								}
@@ -361,6 +389,8 @@ $client_tally = $admin->get_client_tally();
 							case 'users':
 								users.textContent = (data.count.toString() + " user" + (data.count == 1 ? "" : "s"));
 								break;
+							default:
+                       			console.error("unsupported event", data);
 						}
 					};
 				</script>
