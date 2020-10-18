@@ -6,6 +6,7 @@ if($_SESSION['user_level'] < 2){
 
 require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/node_mgmt.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/utility/gui_builder.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/actions/utility/helpers.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/gui/gui_text.php');
 
 $gui = new Gui_Builder();
@@ -99,7 +100,14 @@ $devices_message = NULL;
     // Remove Device
     if(isset($_POST['manageDevices']) && $_POST['manageDevices'] == session_id()){
         if(isset($_POST['device_id'])){
-            print("Not implemented -> Removing ".count($_POST['device_id'])." device.");
+            foreach($_POST['device_id'] as $id){
+                if($node_admin->delete_node_device($id)){
+                    $devices_message = "Device deleted.";
+                }
+                else{
+                    $devices_error = "Error deleting device. ".$GLOBALS['error_message'];
+                }
+            }
         }
     }
 
@@ -117,6 +125,20 @@ $devices_message = NULL;
         }
         else{
             $devices_error = "Device is already registered.";
+        }
+    }
+
+    // Delete Device Invitation
+    if(isset($_POST['manageInvitations']) && $_POST['manageInvitations'] == session_id()){
+        if(isset($_POST['invitation_id'])){
+            foreach($_POST['invitation_id'] as $invitation){
+                if($node_admin->delete_device_invitation($invitation[0])){
+                    $devices_message = "Device invitation deleted.";
+                }
+                else{
+                    $devices_error = "Error deleting invitation. ".$GLOBALS['error_message'];
+                }
+            }
         }
     }
 // Test 
@@ -229,6 +251,12 @@ $devices_message = NULL;
                             }
                         ?>
                     </table>
+                    
+                    <input type="hidden" id="manageDevices" name="manageDevices" value="<?= session_id(); ?>">
+                    </form>
+
+                    <!-- Device Invitation Form -->
+                    <form method="post" id="manage-node-device-invitations" name="manage-node-device-invitations" action="node.php?page=node&id=<?php echo $node_admin->get_node_id(); ?>">
                     <?php 
                         $invitations_list = $node_admin->get_device_invitations(); 
                         if($invitations_list != False){
@@ -238,17 +266,18 @@ $devices_message = NULL;
                                     <tr>
                                         <th>Pending Invitation</th>
                                         <th>Expires</th>
-                                        <th>Status</th>
+                                        <th>Access Code</th>
                                     </tr>
                                 </thead>
                                 <tbody>";
                                 
-                                foreach($node_admin->get_device_invitations() as $id => $dev){
+                                foreach($invitations_list as $id => $dev){
                                     $expiry = $dev['expires'] - time();
                                     if($expiry > 0){
                                         $formated_time = intdiv($expiry, 60);
                                     }
-                                    echo "<tr><td>Serial: ".$dev['device_id']."</td>";
+                                    echo "<tr><td><input type=\"checkbox\" name=\"invitation_id[]\" id=\"invitation-".$id."\" value=\"".$id."\" onclick=\"toggleCheckbox(this, 'invite".$id."')\">
+                                    <label for=\"invitation-".$id."\" class=\"table-list-label\">D/N: ".$dev['device_id']."</label></td>";
                                     echo "<td>";
                                     if($expiry > 0){
                                         if($expiry > 1){
@@ -264,7 +293,7 @@ $devices_message = NULL;
                                     echo "</td><td>";
                                     if($expiry > 0){
                                         if($dev['is_valid'] != 0){
-                                            echo "Waiting";
+                                            echo $dev['access_code'];
                                         }
                                         else{
                                             echo "Used";
@@ -280,14 +309,16 @@ $devices_message = NULL;
                             </table>";
                         }
                     ?>
-                    <input type="hidden" id="manageDevices" name="manageDevices" value="<?= session_id(); ?>">
+                    <input type="hidden" id="manageInvitations" name="manageInvitations" value="<?= session_id(); ?>">
                     </form>
                 </div>
 
                 <!-- Form: Add Device -->
                 <div class="config-form" id="add-device-form" style="display: none;">
+                <div style="color: black; padding-bottom: 5px;"><b>Instructions</b>: Input the serial number and IP address for your board (Settings screen)</div>
                 <form action="node.php?page=node&id=<?php echo $node_admin->get_node_id(); ?>" method="post" id="add_device" name="add_device">
                     <input type="text" name="deviceSerial" id="deviceSerial" placeholder="Device Serial #">
+                    <input type="text" name="deviceIP" id="deviceIP" placeholder="IP Address" value="<?php echo getIPAddress(); ?>">
                     <input type="hidden" id="addNewDevice" name="addNewDevice" value="<?= session_id(); ?>">                 
                     <button class="form-button" id="add-device-button" type="button" onclick="document.getElementById('add_device').submit(); return false;"> Add Device </button>
                 </form>
@@ -297,6 +328,7 @@ $devices_message = NULL;
                 <div class="actions">
                 <a href="javascript:{}" onclick='showForm("add-device-form")'><i class="fas fa-laptop-medical" aria-hidden="true"></i><label>Add Device</label></a>
                 <a href="javascript:{}" onclick="document.getElementById('manage-node-device').submit(); return false;"><i class="fas fa-trash-alt" aria-hidden="true"></i><label>Remove Device</label></a>
+                <a href="javascript:{}" onclick="document.getElementById('manage-node-device-invitations').submit(); return false;"><i class="fas fa-file-excel" aria-hidden="true"></i><label>Cancel Invitation</label></a>
                 </div>
 
             </div>

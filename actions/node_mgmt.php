@@ -105,7 +105,12 @@ class Node_Management {
     public function create_device_invitation($device_id, $user_id){
         $expires = time() + 900;
         $is_valid = True;
-        return $this->device_invitations->add_invitation($device_id, $user_id, $this->node_id, $expires, $is_valid);
+        $access_code = substr(sha1(time()), random_int(1, 33), 7);
+        return $this->device_invitations->add_invitation($device_id, $user_id, $this->node_id, $expires, $is_valid, $access_code);
+    }
+
+    public function delete_device_invitation($invitation_id){
+        return $this->device_invitations->delete_invitation($invitation_id);
     }
 
     public function set_device_status($status, $device_id){
@@ -118,6 +123,10 @@ class Node_Management {
 
     public function get_id_for_device($device_id){
         return $this->node_devices->get_id_for_device($device_id);
+    }
+
+    public function delete_node_device($id){
+        return $this->node_devices->delete_device($id);
     }
 
     public function get_user_level($user_id){

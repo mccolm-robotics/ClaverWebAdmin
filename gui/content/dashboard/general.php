@@ -238,6 +238,7 @@ $client_tally = $admin->get_client_tally();
 			<?php echo $gui->section_heading("fas fa-plug", $dash_title_connected, $dash_connected_tooltip); ?>
 						
 			<div class="config-item">
+				<div class="status">
 				<span class="boards">?</span> Boards Online | <span class="users">?</span> online | Refresh time: 
 				<select name="refresh_times" id="refresh_times" style="padding:0px;">
 					<option value="5">5 sec</option>
@@ -245,6 +246,7 @@ $client_tally = $admin->get_client_tally();
 					<option value="15">15 sec</option>
 					<option value="30">30 sec</option>
 				</select>
+				</div>
 			
 				<form action="dashboard.php" method="post" id="manage_node_devices">
 				<div id="node_devices" style="display:none;">
@@ -255,7 +257,6 @@ $client_tally = $admin->get_client_tally();
 							<th>Uptime</th>
 							<th>Board Ver.</th>
 							<th>Launcher Ver.</th>
-							<th>Branch</th>
 							<th>Ping</th>
 						</tr>
 					</thead>
@@ -269,6 +270,7 @@ $client_tally = $admin->get_client_tally();
 				<script>
 					var users = document.querySelector('.users'),
 						boards = document.querySelector('.boards'),
+						status = document.querySelector('.status'),
 						refresh_interval = 15,
 						device_list = [],
 						websocket = new WebSocket("ws://127.0.0.1:6789");
@@ -283,6 +285,16 @@ $client_tally = $admin->get_client_tally();
 						websocket.send(JSON.stringify({mode: 'WhiteBoard', action: 'minus'}));
 					}
 
+					function deleteRow(tableID, rowID) {
+						try {
+							var table = document.getElementById(tableID);
+							var row = document.getElementById(rowID).rowIndex;
+							table.deleteRow(row);
+						}catch(e) {
+							alert(e);
+						}
+					}
+					
 					function addRow(tableID, device_uuid, state_values) {
 						var table = document.getElementById(tableID);
 
@@ -312,31 +324,16 @@ $client_tally = $admin->get_client_tally();
 						cell4.style.backgroundColor="#ffffff";
 
 						var cell5 = row.insertCell(4);
-						cell5.innerHTML = state_values['branch'];
+						cell5.innerHTML = state_values['ping'];
 						cell5.style.backgroundColor="#ffffff";
-
-						var cell6 = row.insertCell(5);
-						cell6.innerHTML = state_values['ping'];
-						cell6.style.backgroundColor="#ffffff";
-					}
-
-					function deleteRow(tableID, rowID) {
-						try {
-							var table = document.getElementById(tableID);
-							var row = document.getElementById(rowID).rowIndex;
-							table.deleteRow(row);
-						}catch(e) {
-							alert(e);
-						}
 					}
 
 					function updateRow(tableID, rowIndex, state_values){
 						var table = document.getElementById(tableID);
 						table.rows[rowIndex].cells[1].innerHTML = state_values['uptime'];
-						table.rows[rowIndex].cells[2].innerHTML = state_values['board_ver'];
-						table.rows[rowIndex].cells[3].innerHTML = state_values['launcher_ver'];
-						table.rows[rowIndex].cells[4].innerHTML = state_values['branch'];
-						table.rows[rowIndex].cells[5].innerHTML = state_values['ping'];
+						table.rows[rowIndex].cells[2].innerHTML = state_values['board_ver'] + " (" + state_values['board_branch'] + ")";
+						table.rows[rowIndex].cells[3].innerHTML = state_values['launcher_ver'] + " (" + state_values['launcher_branch'] + ")";
+						table.rows[rowIndex].cells[4].innerHTML = state_values['ping'];
 					}
 
 					websocket.onopen = function (e){
@@ -348,6 +345,9 @@ $client_tally = $admin->get_client_tally();
 								state: {'refresh': refresh_interval}
 							}));
 					}
+					// https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+					// https://stackoverflow.com/questions/9056159/websocket-closing-connection-automatically
+					// https://stackoverflow.com/questions/29881957/websocket-connection-timeout
 
 					websocket.onmessage = function (event) {
 						data = JSON.parse(event.data);
@@ -378,7 +378,7 @@ $client_tally = $admin->get_client_tally();
 											else{
 												// console.log("Start");
 												// console.log(device_uuid);	// UUID
-												// console.log(data.value[device_uuid]);
+												console.log(data.value[device_uuid]);
 												device_list.push(device_uuid);
 												addRow('devices_table', device_uuid, data.value[device_uuid]);
 											}

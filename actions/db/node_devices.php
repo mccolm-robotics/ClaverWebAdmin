@@ -4,6 +4,7 @@
 // [1]  - (S) get_node_devices($node_id)            R=> assoc array
 // [2]  - (U) set_status($status, $device_id)       R=> bool
 // [3]  - (S) get_id_for_device($device_id)         R=> int
+// [4]  - (D) delete_device($id)                    R=> bool
 
 
   ///////////////////////////////////////////
@@ -81,6 +82,27 @@ class Node_Devices{
         }
         else {
             $GLOBALS['error_message'] = "Bad SQL Query: [Node_Devices] Get ID For Device";
+            return false;
+        }
+    }
+
+    // [4]
+    // DELETE: Remove a device from the node_devices table
+    //-- $id: 'id' value of device from node_devices table (INT)
+    // RETURN: boolean
+    public function delete_device($id){
+        if ($stmt = $this->connection->prepare('DELETE FROM node_devices WHERE id = ?')) {
+            $stmt->bind_param('i', $id);
+            $status = $stmt->execute();
+            $stmt->close();
+            if($status === false){
+                $GLOBALS['error_message'] = "SQL DELETE FAILED: [Node_Devices] Delete Device";
+                return false;
+            }            
+            return true;
+        }
+        else{
+            $GLOBALS['error_message'] = "Bad SQL Query: [Node_Devices] Delete Device";
             return false;
         }
     }
