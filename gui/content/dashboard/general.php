@@ -273,6 +273,7 @@ $client_tally = $admin->get_client_tally();
 						status = document.querySelector('.status'),
 						refresh_interval = 15,
 						device_list = [],
+						checkbox_list = {},
 						websocket = new WebSocket("ws://127.0.0.1:6789");
 
 					var selected_time = document.getElementById('refresh_times');
@@ -281,8 +282,26 @@ $client_tally = $admin->get_client_tally();
 						websocket.send(JSON.stringify({channel_type: 'direct', action: {update: {setting: {refresh_interval: this.options[this.selectedIndex].value}}}}));
 					}
 
-					function some_func(){
-						websocket.send(JSON.stringify({mode: 'WhiteBoard', action: 'minus'}));
+					function randomString(len) {
+						var str = "";                                // String result
+						for (var i = 0; i < len; i++) {              // Loop `len` times
+							var rand = Math.floor(Math.random() * 62); // random: 0..61
+							var charCode = rand += rand > 9 ? (rand < 36 ? 55 : 61) : 48; // Get correct charCode
+							str += String.fromCharCode(charCode);      // add Character to str
+						}
+						return "C" + str; // After all loops are done, return the concatenated string
+					}
+
+					function request_update(){
+						console.log(checkbox_list);
+						if (device_list.length > 0){
+							for(const dev_uuid of device_list){
+								if(document.getElementById(checkbox_list[dev_uuid]).checked){
+									console.log("We have a match");
+									websocket.send(JSON.stringify({channel_type: 'deliver', recipient: dev_uuid, destination: "coupler", message: [{type: "directive", value: "restart"}] }));
+								}
+							}
+						}
 					}
 
 					function deleteRow(tableID, rowID) {
@@ -294,7 +313,7 @@ $client_tally = $admin->get_client_tally();
 							alert(e);
 						}
 					}
-					
+
 					function addRow(tableID, device_uuid, state_values) {
 						var table = document.getElementById(tableID);
 
@@ -306,6 +325,9 @@ $client_tally = $admin->get_client_tally();
 						var element1 = document.createElement("input");
 						element1.type = "checkbox";
 						element1.name="chkbox[]";
+						id = randomString(10);
+						checkbox_list[device_uuid] = id;
+						element1.id = id;
 						cell1.appendChild(element1);
 						var textnode = document.createTextNode(" " + state_values['name']);
 						cell1.appendChild(textnode);
@@ -389,14 +411,14 @@ $client_tally = $admin->get_client_tally();
 							case 'users':
 								users.textContent = (data.count.toString() + " user" + (data.count == 1 ? "" : "s"));
 								break;
-							default:
-                       			console.error("unsupported event", data);
+							// default:
+                       		// 	console.error("unsupported event", data);
 						}
 					};
 				</script>
 			</div>
 			<div class="actions">
-			<a onclick='some_func()'><i class="fas fa-upload" aria-hidden="true"></i><label>Update</label></a>
+			<a onclick='request_update()'><i class="fas fa-upload" aria-hidden="true"></i><label>Update</label></a>
 			<a href="#"><i class="fas fa-minus-circle" aria-hidden="true"></i><label>Deauthorize</label></a>
 			<a href="#"><i class="fa fa-sync" aria-hidden="true"></i><label>Refresh</label></a>
 			</div>
