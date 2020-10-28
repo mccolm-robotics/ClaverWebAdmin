@@ -279,7 +279,7 @@ $client_tally = $admin->get_client_tally();
 					var selected_time = document.getElementById('refresh_times');
 					selected_time.value = refresh_interval;
 					selected_time.onchange = function(){
-						websocket.send(JSON.stringify({channel_type: 'direct', action: {update: {setting: {refresh_interval: this.options[this.selectedIndex].value}}}}));
+						websocket.send(JSON.stringify({channel_type: 'direct', endpoint: "coupler", message: [{type: "setting", value: {refresh_interval: this.options[this.selectedIndex].value}}]}));
 					}
 
 					function randomString(len) {
@@ -298,7 +298,7 @@ $client_tally = $admin->get_client_tally();
 							for(const dev_uuid of device_list){
 								if(document.getElementById(checkbox_list[dev_uuid]).checked){
 									console.log("We have a match");
-									websocket.send(JSON.stringify({channel_type: 'deliver', recipient: dev_uuid, destination: "coupler", message: [{type: "directive", value: "restart"}] }));
+									websocket.send(JSON.stringify({channel_type: 'deliver', recipient: dev_uuid, endpoint: "coupler", message: [{type: "directive", value: "restart"}] }));
 								}
 							}
 						}

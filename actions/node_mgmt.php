@@ -9,6 +9,7 @@
     require_once 'db/node_members.php';
     require_once 'db/node_devices.php';
     require_once 'db/device_invitations.php';
+    require_once 'db/ip_whitelist.php';
 
     // Global variables for passing result messages
     $success_message = NULL;
@@ -25,7 +26,7 @@ class Node_Management {
     private $node_id;
     private $node_name;
     private $node_alias;
-    private $authorized_devices;
+    private $authorized_devices = [];
     public $node_clients;
     public $node_owner_id;
 
@@ -35,6 +36,7 @@ class Node_Management {
     private $node_members;
     private $node_devices;
     private $device_invitations;
+    private $ip_whitelist;
     private $page_data = array(); // A list of arrays with data created for this page
 
     function __construct($connection, $node_id){
@@ -45,6 +47,7 @@ class Node_Management {
         $this->node_members = new Node_Members($connection);
         $this->node_devices = new Node_Devices($connection);
         $this->device_invitations = new Device_Invitations($connection);
+        $this->ip_whitelist = new IP_Whitelist($connection);
 
         if($node_id == NULL){
             $this->node_id = $this->node_members->get_node_membership($_SESSION['id']);
@@ -111,6 +114,22 @@ class Node_Management {
 
     public function delete_device_invitation($invitation_id){
         return $this->device_invitations->delete_invitation($invitation_id);
+    }
+
+    public function add_ip_to_whitelist($ip_address, $user_id){
+        $existing_addresses = $this->ip_whitelist->get_existing_address($ip_address);
+        if(is_array($existing_addresses)){
+            if(count($existing_addresses) == 0){
+                return $this->ip_whitelist->add_address($ip_address, $user_id);
+            }
+            else{
+                return True;
+            }
+        }
+        else{
+            // There was an error with DB Query
+            return False;
+        }
     }
 
     public function set_device_status($status, $device_id){

@@ -114,10 +114,14 @@ $devices_message = NULL;
     // Create Device Invitation
     if(isset($_POST['addNewDevice']) && $_POST['addNewDevice'] == session_id()){
         //Check to make sure device has not already been added
+        //ToDo: Use regex to check device serial & IP address
         if(!$node_admin->get_id_for_device($_POST['deviceSerial'])){
             // Serial not already being used.
             if($node_admin->create_device_invitation($_POST['deviceSerial'], $_SESSION['id'])){
                 $devices_message = "Device invitation created successfully. This invitation is valid for 15 minutes.";
+                if(!$node_admin->add_ip_to_whitelist($_POST['deviceIP'], $_SESSION['id'])){
+                    $devices_error = "Error adding IP to whitelist. ".$GLOBALS['error_message'];
+                }
             }
             else{
                 $devices_error = "Error creating invitation. ".$GLOBALS['error_message'];
@@ -132,7 +136,7 @@ $devices_message = NULL;
     if(isset($_POST['manageInvitations']) && $_POST['manageInvitations'] == session_id()){
         if(isset($_POST['invitation_id'])){
             foreach($_POST['invitation_id'] as $invitation){
-                if($node_admin->delete_device_invitation($invitation[0])){
+                if($node_admin->delete_device_invitation($invitation)){
                     $devices_message = "Device invitation deleted.";
                 }
                 else{
@@ -227,30 +231,39 @@ $devices_message = NULL;
                 <div class="config-item">
                     <!-- Node Device Form -->
                     <form method="post" id="manage-node-device" name="manage-node-device" action="node.php?page=node&id=<?php echo $node_admin->get_node_id(); ?>">   
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Device Name</th>
-                                <th>Type</th>
-                                <th>Serial</th>
-                                <th>Up-Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                            foreach($node_admin->get_authorized_devices() as $id => $node_dev){
-                                echo "<tr><td><input type=\"checkbox\" name=\"device_id[]\" id=\"device-".$id."\" value=\"".$id."\" onclick=\"toggleCheckbox(this, 'dev".$id."')\">
-                                <label for=\"device-".$id."\" class=\"";
-                                echo ($node_dev['status'] == True)? "online" : "offline"; 
-                                echo" table-list-label\">".$node_dev['device_name']."</label></td>";
-                                echo "<td>".$node_dev['platform']."</td>";
-                                echo "<td>".$node_dev['device_id']."</td>";
-                                echo "<td>";
-                                echo ($node_dev['status'] == True)? $node_admin->elapsed_time($node_dev['last_reconnect']): "Off-line";
-                                echo "</td></tr>";
-                            }
-                        ?>
-                    </table>
+                    <?php 
+                        $authorized_devices = $node_admin->get_authorized_devices(); 
+                        if(count($authorized_devices) > 0){
+                            echo "
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Device Name</th>
+                                        <th>Type</th>
+                                        <th>Serial</th>
+                                        <th>Up-Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>";                   
+                                
+                                foreach($authorized_devices as $id => $node_dev){
+                                    echo "<tr><td><input type=\"checkbox\" name=\"device_id[]\" id=\"device-".$id."\" value=\"".$id."\" onclick=\"toggleCheckbox(this, 'dev".$id."')\">
+                                    <label for=\"device-".$id."\" class=\"";
+                                    echo ($node_dev['status'] == True)? "online" : "offline"; 
+                                    echo" table-list-label\">".$node_dev['device_name']."</label></td>";
+                                    echo "<td>".$node_dev['platform']."</td>";
+                                    echo "<td>".$node_dev['device_id']."</td>";
+                                    echo "<td>";
+                                    echo ($node_dev['status'] == True)? $node_admin->elapsed_time($node_dev['last_reconnect']): "Off-line";
+                                    echo "</td></tr>";
+                                }
+                            echo "</table>";
+                        }
+                        else{
+                            echo "No authorized devices connected to this node.";
+                        }
+                    ?>
+                            
                     
                     <input type="hidden" id="manageDevices" name="manageDevices" value="<?= session_id(); ?>">
                     </form>

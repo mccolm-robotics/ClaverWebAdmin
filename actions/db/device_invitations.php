@@ -71,6 +71,7 @@ class Device_Invitations{
             $status = $stmt->execute();
             $stmt->close();
             if($status === false){
+                echo "error";
                 $GLOBALS['error_message'] = "SQL DELETE FAILED: [Device_Invitations] Delete Invitation";
                 return false;
             }            
