@@ -140,12 +140,23 @@ class Node_Management {
         return $this->authorized_devices;
     }
 
+    public function refresh_authorized_devices_list(){
+        // Get a list of connected Claver devices
+        $devices = $this->node_devices->get_node_devices($this->node_id);
+        $this->authorized_devices = array();
+        foreach($devices as $item){
+            $this->authorized_devices[$item['id']] = $item;
+        }
+    }
+
     public function get_id_for_device($device_id){
         return $this->node_devices->get_id_for_device($device_id);
     }
 
     public function delete_node_device($id){
-        return $this->node_devices->delete_device($id);
+        $result = $this->node_devices->delete_device($id);
+        $this->refresh_authorized_devices_list();
+        return $result;
     }
 
     public function get_user_level($user_id){

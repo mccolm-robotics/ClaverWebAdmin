@@ -274,7 +274,7 @@ $client_tally = $admin->get_client_tally();
 						refresh_interval = 15,
 						device_list = [],
 						checkbox_list = {},
-						websocket = new WebSocket("ws://127.0.0.1:6789");
+						websocket = new WebSocket("ws://192.168.1.17:6789");
 
 					var selected_time = document.getElementById('refresh_times');
 					selected_time.value = refresh_interval;
