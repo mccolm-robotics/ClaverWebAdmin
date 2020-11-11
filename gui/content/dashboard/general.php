@@ -274,7 +274,7 @@ $client_tally = $admin->get_client_tally();
 						refresh_interval = 15,
 						device_list = [],
 						checkbox_list = {},
-						websocket = new WebSocket("ws://192.168.1.17:6789");
+						websocket = new WebSocket("ws://192.168.1.25:6789");
 
 					var selected_time = document.getElementById('refresh_times');
 					selected_time.value = refresh_interval;
@@ -373,46 +373,47 @@ $client_tally = $admin->get_client_tally();
 
 					websocket.onmessage = function (event) {
 						data = JSON.parse(event.data);
-						switch (data.type) {
-							case 'state':
-								boards.textContent = Object.keys(data.value).length;
-								// Remove any devices from the table that are no longer active
-								if (device_list.length > 0){
-									for(const dev_uuid of device_list){
-										if(!(dev_uuid in data.value)){
-											deleteRow('devices_table', dev_uuid);
-											array_location = device_list.indexOf(dev_uuid);
-											device_list.splice(array_location, 1);
-											if(device_list.length == 0){
-												document.getElementById("node_devices").style.display = "none";
+						if (data.type == "state"){
+							switch (data.property) {
+								case 'active_boards':
+									boards.textContent = Object.keys(data.values).length;
+									// Remove any devices from the table that are no longer active
+									if (device_list.length > 0){
+										for(const dev_uuid of device_list){
+											if(!(dev_uuid in data.values)){
+												deleteRow('devices_table', dev_uuid);
+												array_location = device_list.indexOf(dev_uuid);
+												device_list.splice(array_location, 1);
+												if(device_list.length == 0){
+													document.getElementById("node_devices").style.display = "none";
+												}
 											}
 										}
 									}
-								}
-								if (typeof data.value === 'object' && data.value !== null){
-									if(Object.keys(data.value).length > 0){
-										document.getElementById("node_devices").style.display = "block";
-										for (const device_uuid in data.value){
-											if (device_list.includes(device_uuid)){
-												var rowIndex = document.getElementById(device_uuid).rowIndex;
-												updateRow('devices_table', rowIndex, data.value[device_uuid]);
-											}
-											else{
-												// console.log("Start");
-												// console.log(device_uuid);	// UUID
-												console.log(data.value[device_uuid]);
-												device_list.push(device_uuid);
-												addRow('devices_table', device_uuid, data.value[device_uuid]);
+									if (typeof data.values === 'object' && data.values !== null){
+										if(Object.keys(data.values).length > 0){
+											document.getElementById("node_devices").style.display = "block";
+											for (const device_uuid in data.values){
+												if (device_list.includes(device_uuid)){
+													var rowIndex = document.getElementById(device_uuid).rowIndex;
+													updateRow('devices_table', rowIndex, data.values[device_uuid]);
+												}
+												else{
+													// console.log("Start");
+													// console.log(device_uuid);	// UUID
+													// console.log(data.values[device_uuid]);
+													device_list.push(device_uuid);
+													addRow('devices_table', device_uuid, data.values[device_uuid]);
+												}
 											}
 										}
 									}
-								}
-								break;
-							case 'users':
-								users.textContent = (data.count.toString() + " user" + (data.count == 1 ? "" : "s"));
-								break;
-							// default:
-                       		// 	console.error("unsupported event", data);
+									break;
+								case 'users':
+									// console.log(data.values.count);
+									users.textContent = (data.values.count.toString() + " user" + (data.values.count == 1 ? "" : "s"));
+									break;
+							}
 						}
 					};
 				</script>
